@@ -57,7 +57,7 @@ To begin, clone this repository and ensure you have `uv` installed (`pip install
 
 You are now ready to begin development!
 
-PRO TIP: If you want a nice UI to work with your data, you can use DuckDB's web UI. After running the `seed` command, run `uv run duckdb -ui` in your terminal. This will open a UI in your browser where you can inspect the database. For more details, see the [DuckDB UI documentation](https://github.com/duckdb/duckdb-wasm/tree/master/packages/duckdb-browser-ui). Remember to attach dev.duckdb database in the ui.
+PRO TIP: If you want a nice UI to work with your data, you can use DuckDB's web UI. After running the `seed` command, run `uv run duckdb -ui` in your terminal. This will open a UI in your browser where you can inspect the database. For more details, see the [DuckDB UI documentation](https://github.com/duckdb/duckdb-wasm/tree/master/packages/duckdb-browser-ui). Remember to attach olist.duckdb database in the ui.
 
 ### **Your Mission**
 

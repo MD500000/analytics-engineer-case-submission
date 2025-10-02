@@ -2,7 +2,7 @@ duckdb:
   outputs:
     dev:
       type: duckdb
-      path: dev.duckdb
+      path: olist.duckdb
       external_root: "data"
       threads: 4
 
