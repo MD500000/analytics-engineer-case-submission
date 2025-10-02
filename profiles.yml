@@ -1,0 +1,9 @@
+duckdb:
+  outputs:
+    dev:
+      type: duckdb
+      path: dev.duckdb
+      external_root: "data"
+      threads: 4
+
+  target: dev

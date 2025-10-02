@@ -1,0 +1,1 @@
+select * from {{ ref('olist_customers_dataset') }}

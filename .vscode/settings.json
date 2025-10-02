@@ -1,0 +1,11 @@
+{
+  "files.associations": {
+    "*.sql": "jinja-sql"
+  },
+  "[jinja-sql]": {
+    "editor.defaultFormatter": "innoverio.vscode-dbt-power-user",
+    "editor.formatOnSave": false
+  },
+  "dbt.perspectiveTheme": "Monokai",
+  "dbt.enableNewLineagePanel": true
+}
