@@ -23,25 +23,37 @@ Included in this repository:
 
 To begin, clone this repository and ensure you have `uv` installed (`pip install uv`). Then, follow these steps in your terminal:
 
-1. **Install Dependencies:** Create the virtual environment and install all dependencies from `pyproject.toml`.
+1. **Install Dependencies:** This command creates the virtual environment (`.venv`) if it doesn't exist and installs all dependencies specified in `pyproject.toml`.
+
+   Bash
 
    ```
    uv sync
    ```
 
-2. **Load Raw Data:** Use the `dbt seed` command to load all the raw CSV files from the `seeds` directory into your local `duckdb` database.
+2. **Set Up Your IDE (VS Code):** To ensure features like auto-completion and extensions (e.g., dbt Power User) work correctly, you **must** select the project's Python interpreter.
+
+   - Open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`).
+   - Search for **`Python: Select Interpreter`**.
+   - Choose the interpreter located in the `./.venv` folder of this project.
+
+3. **Load Raw Data:** Use the `dbt seed` command to load all the raw CSV files from the `seeds` directory into your local `duckdb` database.1
+
+   Bash
 
    ```
    uv run dbt seed
    ```
 
-3. **Verify Setup:** You can verify that the data has been loaded correcly running the test model
+4. **Verify Setup:** You can verify that the data has been loaded correctly by running the test model.
+
+   Bash
 
    ```
    uv run dbt run
    ```
 
-this should output test.parquet file into the data folder
+   This should output a `test.parquet` file into the `data` folder.
 
 You are now ready to begin development!
 
