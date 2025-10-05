@@ -27,8 +27,8 @@ Nothing specific here! Just as long as dependancies and setup is the same as des
 - **Answering Business Questions:**
   - Customer Behavior (most valuable, purchasing patterns): aggregate `fct_customers_products.lifetime_total_value` and `total_orders_count` by `customer_unique_id`, enrich with `dim_customers.first_order_date`/`last_order_date` and `most_popular_category` to segment by category preference.
   - Product Performance (best-selling products/categories): rank within `fct_product_performance` by `total_revenue` or `total_items_sold` per `performance_month`, join to `dim_products.product_category_name_english` to roll up by category.
-  - Geographic Performance (key markets by city/state): join `fct_customers_products` to `dim_customers_geography` on `customer_unique_id`, then sum `lifetime_total_value` or order counts by `state`/`city`. The missing-geo flag supports data quality-aware reporting.
-  - Order Fulfillment (time from order to delivery, variability): use `fct_fulfillment_metrics` delivery KPIs (`avg_delivery_days`, `min/max`, `stddev`) by `seller_id`; for customer-centric SLA views, aggregate delivery deltas in `int_orders_customers`.
+  - Geographic Performance (key markets by city/state): join `fct_orders_stats` to `dim_customers_geography` on `customer_id`, then aggregate `total_price` and count orders by `state`/`city`. Use the missing-geo flag for data quality-aware reporting.
+  - Order Fulfillment (time from order to delivery, variability): use `fct_fulfillment_metrics` KPIs (`avg_delivery_days`, `min/max`, `stddev`) by `seller_id`, and join to `dim_sellers_geography` to slice results by seller location.
 
 ### **3. Assumptions & Trade-offs**
 
