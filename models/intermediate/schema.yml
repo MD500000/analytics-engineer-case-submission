@@ -1,0 +1,199 @@
+version: 2
+
+models:
+  # === INTERMEDIATE MODELS ===
+  
+  - name: int_customer_products
+    description: "Intermediate model linking customers to their most frequently purchased product categories"
+    columns:
+      - name: customer_unique_id
+        description: "Unique customer identifier"
+        tests:
+          - unique
+          - not_null
+      - name: most_popular_category
+        description: "Most frequently purchased product category for the customer"
+        tests:
+          - not_null
+
+  - name: int_orders_customers
+    description: "Intermediate model joining orders, customers, order items, and payments"
+    columns:
+      - name: order_id
+        description: "Unique order identifier"
+        tests:
+          - not_null
+      - name: customer_id
+        description: "Customer identifier"
+        tests:
+          - not_null
+      - name: customer_unique_id
+        description: "Unique customer identifier for analysis"
+        tests:
+          - not_null
+      - name: price
+        description: "Price of the order item"
+        tests:
+          - not_null
+      - name: freight_value
+        description: "Freight value for the order item"
+        tests:
+          - not_null
+      - name: product_id
+        description: "Product identifier"
+        tests:
+          - not_null
+      - name: seller_id
+        description: "Seller identifier"
+        tests:
+          - not_null
+      - name: order_purchase_timestamp
+        description: "Timestamp when the order was purchased"
+        tests:
+          - not_null
+      - name: order_delivered_customer_date
+        description: "Date when the order was delivered to customer"
+        tests:
+          - not_null
+      - name: payment_sequential
+        description: "Payment sequential number"
+        tests:
+          - not_null
+      - name: payment_installments
+        description: "Number of payment installments"
+        tests:
+          - not_null
+      - name: payment_value
+        description: "Payment value"
+        tests:
+          - not_null
+
+  - name: int_orders_products
+    description: "Intermediate model joining orders, order items, and products with physical dimensions"
+    columns:
+      - name: order_id
+        description: "Unique order identifier"
+        tests:
+          - not_null
+      - name: customer_id
+        description: "Customer identifier"
+        tests:
+          - not_null
+      - name: product_id
+        description: "Product identifier"
+        tests:
+          - not_null
+      - name: price
+        description: "Price of the order item"
+        tests:
+          - not_null
+      - name: freight_value
+        description: "Freight value for the order item"
+        tests:
+          - not_null
+      - name: order_item_id
+        description: "Order item identifier"
+        tests:
+          - not_null
+      - name: order_purchase_timestamp
+        description: "Timestamp when the order was purchased"
+        tests:
+          - not_null
+      - name: order_delivered_customer_date
+        description: "Date when the order was delivered to customer"
+        tests:
+          - not_null
+      - name: product_weight_g
+        description: "Product weight in grams"
+        tests:
+          - not_null
+      - name: product_length_cm
+        description: "Product length in centimeters"
+        tests:
+          - not_null
+      - name: product_height_cm
+        description: "Product height in centimeters"
+        tests:
+          - not_null
+      - name: product_width_cm
+        description: "Product width in centimeters"
+        tests:
+          - not_null
+      - name: product_photos_qty
+        description: "Number of product photos"
+        tests:
+          - not_null
+
+  - name: int_orders_sellers
+    description: "Intermediate model joining orders, order items, and sellers"
+    columns:
+      - name: seller_id
+        description: "Seller identifier"
+        tests:
+          - not_null
+      - name: order_id
+        description: "Unique order identifier"
+        tests:
+          - not_null
+      - name: product_id
+        description: "Product identifier"
+        tests:
+          - not_null
+      - name: freight_value
+        description: "Freight value for the order item"
+        tests:
+          - not_null
+      - name: price
+        description: "Price of the order item"
+        tests:
+          - not_null
+      - name: order_purchase_timestamp
+        description: "Timestamp when the order was purchased"
+        tests:
+          - not_null
+      - name: order_delivered_customer_date
+        description: "Date when the order was delivered to customer"
+        tests:
+          - not_null
+
+# === CROSS-MODEL RELATIONSHIP TESTS ===
+tests:
+  - relationships:
+      source: ref('int_customer_products')
+      from: customer_id
+      to: ref('stg_customers')
+      to_field: customer_id
+      config:
+        severity: warn
+
+  - relationships:
+      source: ref('int_orders_customers')
+      from: product_id
+      to: ref('stg_products')
+      to_field: product_id
+      config:
+        severity: warn
+
+  - relationships:
+      source: ref('int_orders_customers')
+      from: seller_id
+      to: ref('stg_sellers')
+      to_field: seller_id
+      config:
+        severity: warn
+
+  - relationships:
+      source: ref('int_orders_products')
+      from: order_id
+      to: ref('stg_orders')
+      to_field: order_id
+      config:
+        severity: warn
+
+  - relationships:
+      source: ref('int_orders_sellers')
+      from: order_id
+      to: ref('stg_orders_items')
+      to_field: order_id
+      config:
+        severity: warn

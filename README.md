@@ -1,120 +1,61 @@
-# Analytics Engineer - Take-Home Case Study
-
-### **Introduction**
-
-Welcome! This case study is designed to simulate a typical project for an Analytics Engineer on our Data & Integration team. Our goal is to see how you approach a real-world dataset and transform it into a valuable, trusted analytical asset.
-
-This exercise focuses on your data modeling philosophy, technical skills with modern tools, and your ability to create a foundation for business insights, all while adhering to software engineering best practices.
-
-**Fictional Company Context:** You are a new Analytics Engineer at **"Nordic Trail Outfitters,"** an e-commerce company specializing in outdoor and hiking gear. We've just acquired a new company that operates in Brazil, and we need you to analyze their historical sales data to understand their business.
-
-### **The Project Environment**
-
-This repository is a self-contained, ready-to-use `dbt` project. We have already handled the initial setup to allow you to focus on the core analytics engineering tasks.
-
-Included in this repository:
-
-- A standard `dbt` project structure.
-- `uv` for simple and fast Python environment and dependency management (see `pyproject.toml`).
-- The raw **Brazilian E-Commerce Public Dataset by Olist** located in the `seeds` directory.
-- A pre-configured `profiles.yml` that configures `dbt` to use a local `duckdb` database file (`olist.duckdb`), which will be created in the project directory.
-
-### **Getting Started**
-
-To begin, clone this repository and ensure you have `uv` installed (`pip install uv`). Then, follow these steps in your terminal:
-
-1. **Install Dependencies:** This command creates the virtual environment (`.venv`) if it doesn't exist and installs all dependencies specified in `pyproject.toml`.
-
-   Bash
-
-   ```
-   uv sync
-   ```
-
-2. **Set Up Your IDE (VS Code):** To ensure features like auto-completion and extensions (e.g., dbt Power User) work correctly, you **must** select the project's Python interpreter.
-
-   - Open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`).
-   - Search for **`Python: Select Interpreter`**.
-   - Choose the interpreter located in the `./.venv` folder of this project.
-
-3. **Load Raw Data:** Use the `dbt seed` command to load all the raw CSV files from the `seeds` directory into your local `duckdb` database.1
-
-   Bash
-
-   ```
-   uv run dbt seed
-   ```
-
-4. **Verify Setup:** You can verify that the data has been loaded correctly by running the test model.
-
-   Bash
-
-   ```
-   uv run dbt run
-   ```
-
-   This should output a `test.parquet` file into the `data` folder.
-
-You are now ready to begin development!
-
-PRO TIP: If you want a nice UI to work with your data, you can use DuckDB's web UI. After running the `seed` command, run `uv run duckdb -ui` in your terminal. This will open a UI in your browser where you can inspect the database. For more details, see the [DuckDB UI documentation](https://github.com/duckdb/duckdb-wasm/tree/master/packages/duckdb-browser-ui). Remember to attach olist.duckdb database in the ui.
-
-### **Your Mission**
-
-The leadership team needs to understand the performance of our newly acquired Brazilian operation. Your mission is to create a well-modeled data warehouse foundation using `dbt` that will empower our business analysts to answer critical questions and power their future BI dashboards.
-
-Your final data models should be designed to easily answer high-level business questions like:
-
-- **Customer Behavior:** Who are our most valuable customers? What are their purchasing patterns?
-- **Product Performance:** What are our best-selling products and product categories?
-- **Geographic Performance:** Where are our key markets geographically (by city/state)?
-- **Order Fulfillment:** What is the average time between an order being placed and delivered? How does this vary?
-
-### **Core Tasks**
-
-1. **Model the Data:**
-
-   - Following `dbt` best practices, transform the raw data into a logical, multi-layered architecture (e.g., staging, intermediate, marts).
-   - You have the freedom to decide on the final data models. Your choices should be driven by the goal of answering the business questions listed above. Consider creating models like a `fct_orders` (fact table) and `dim_customers` (dimension table), or other structures you feel are appropriate.
-
-2. **Ensure Data Trust:**
-
-   - Implement comprehensive `dbt` tests (both generic and custom) to ensure the accuracy, integrity, and validity of your data models. Quality is more important than quantity.
-
-3. **Document Your Work:**
-
-   - Use `dbt`'s documentation features (`dbt docs generate`) by adding descriptions for your models and columns in `.yml` files.
-   - **Crucially, you must update the second half of this `README.md` file** in your submission to explain your work to the hiring team.
-
-### **Final Deliverable**
-
-Your final deliverable is a link to your forked repository containing all your completed work.
-
-Please complete the sections below in this `README.md` file. Your written explanations are as important as your code.
-
 ## **Candidate Submission**
 
 ### **1. How to Run This Project**
 
-_(Please add any specific instructions for running your final models and tests here. For example: `uv run dbt build`)_
+Nothing specific here! Just as long as dependancies and setup is the same as described above, just run ``uv run dbt run``
 
 ### **2. Data Modeling Decisions**
 
-_(This is the most important section. Please justify your architectural choices.)_
+- **Architectural Pattern:** I chose to do a dimensional model (star schema) built in layers. Staging models (`stg_*`) are simple views where I standardize types, clean obvious nulls/zeros, and add simple row-level flags. Intermediate models (`int_*`) assemble business-ready rows, apply row filtering (e.g., exclude `canceled`/`unavailable` and require valid timestamps), and add joins across orders, items, sellers, products, payments, and customers. Mart models (`dim_*` and `fct_*`) are materialized as tables and provide the primary analytics interface for analysts.
 
-- **Architectural Pattern:** _(e.g., "I chose a dimensional model with fact and dimension tables because...")_
-- **Key Models:** _(Describe the purpose of your main Silver/Gold layer models. For example:)_
-  - `dim_customers`: _This model provides a single, clean view of every customer..._
-  - `fct_orders`: _This model captures every order event and includes key metrics like..._
-- **Answering Business Questions:** _(Explain how your models would be used to answer one of the business questions from the challenge. For example: "To find our most valuable customers, an analyst could join `dim_customers` with `fct_orders` and sum the `total_amount` per customer...")_
+- **Grain and Keys:**
+  - `fct_orders_stats` (grain: one row per `order_id`): derives counts, revenue, freight, and convenience ratios for order-level analysis.
+  - `fct_product_performance` (grain: `product_id` by `performance_month`): monthly sales, revenue, freight, customer reach, and physical averages; supports trend and cohort-style analysis.
+  - `fct_customers_products` (grain: `customer_unique_id`): customer lifetime metrics (orders, revenue, freight, payment behavior) and product/seller diversity.
+  - `fct_fulfillment_metrics` (grain: `seller_id`): throughput, revenue, freight, and delivery-time statistics to assess fulfillment performance.
+  - `dim_customers` (grain: `customer_unique_id`): first/last order dates and the customer’s most popular category.
+  - `dim_products` (grain: `product_id`): cleaned product attributes and English category mapping.
+  - `dim_customers_geography` (grain: `customer_id`/`customer_unique_id`): standardized city/state/ZIP joined to geolocation with a missing-geo flag.
+  - `dim_sellers_geography` (grain: `seller_id`): standardized city/state/ZIP joined to geolocation with a missing-geo flag.
+
+- **Key Modeling Choices:**
+  - Orders with status in (`canceled`, `unavailable`) and rows missing critical timestamps are excluded in some cases.
+  - Product attributes are validated; invalid physical dimensions are either flagged in staging or filtered out.
+  - Text standardization for better joinability and grouping (e.g., lowercased cities, uppercased states, lowercased categories) and English category translation in `dim_products`.
+  - Materialization: staging as views for agility; intermediate/marts as tables for performance and stability.
+
+- **Answering Business Questions:**
+  - Customer Behavior (most valuable, purchasing patterns): aggregate `fct_customers_products.lifetime_total_value` and `total_orders_count` by `customer_unique_id`, enrich with `dim_customers.first_order_date`/`last_order_date` and `most_popular_category` to segment by category preference.
+  - Product Performance (best-selling products/categories): rank within `fct_product_performance` by `total_revenue` or `total_items_sold` per `performance_month`, join to `dim_products.product_category_name_english` to roll up by category.
+  - Geographic Performance (key markets by city/state): join `fct_customers_products` to `dim_customers_geography` on `customer_unique_id`, then sum `lifetime_total_value` or order counts by `state`/`city`. The missing-geo flag supports data quality-aware reporting.
+  - Order Fulfillment (time from order to delivery, variability): use `fct_fulfillment_metrics` delivery KPIs (`avg_delivery_days`, `min/max`, `stddev`) by `seller_id`; for customer-centric SLA views, aggregate delivery deltas in `int_orders_customers`.
 
 ### **3. Assumptions & Trade-offs**
 
 _(Briefly describe any assumptions you made and any trade-offs you considered.)_
 
-- **Assumptions:** _(e.g., "I assumed that any order without a `delivered_at` timestamp is still in-flight and excluded it from delivery time calculations.")_
-- **Trade-offs:** _(e.g., "For performance, I chose to denormalize the product category directly into the `fct_orders` table. This increases data redundancy but simplifies queries for analysts, avoiding an extra join.")_
+- **Assumptions:**
+  - Delivery timestamps: when `order_delivered_carrier_date` > `order_delivered_customer_date`, the row is retained and flagged (see `stg_orders.has_invalid_delivery_dates`); not corrected or dropped.
+  - Product dimensions: missing/zero physical dimensions are flagged in staging (`stg_products.has_invalid_dimensions`). Rows with invalid dimensions are excluded only where physical metrics are computed (`int_orders_products`).
+  - Product categories: missing categories are filled as `Other`; Portuguese-to-English mapping is applied where available in `dim_products`.
+  - Order filtering: fulfillment and order metrics consider only rows with `order_status = 'delivered'` and valid purchase/delivery timestamps; `canceled`/`unavailable` are excluded upstream in `int_orders_*` models.
+  - Customer identity: `customer_unique_id` is treated as the stable customer key for lifetime metrics.
+
+- **Trade-offs:**
+  - Excluding canceled/unavailable orders simplifies SLA and revenue KPIs but removes cancellation-rate analysis from the same marts (would require separate marts or views).
+  - Filling categories as `Other` improves grouping consistency but hides nuance about data quality; downstream category analyses should optionally filter this bucket.
+  - No SCDs: dimensions are current-state snapshots; historical changes to geography or product attributes are not tracked over time.
+  - Materialization choice: views in staging reduce storage but compute shifts to downstream tables; tables in marts increase storage but speed up analyst queries.
+  - Filtering invalid dimensions may bias physical averages toward complete records; a data quality dashboard is recommended for monitoring coverage over time.
+  - Monthly grain in product performance reduces storage and speeds trend queries, at the cost of losing day-level metrics.
 
 ### **4. Suggestions for Improvement**
 
 _(If you had more time, what would you add or change? e.g., CI/CD setup, performance optimizations, more advanced testing.)_
+
+- Introduce daily-grain product performance for seasonality; keep monthly as an aggregate rollup.
+- Create separate marts for cancellations/returns to analyze rates and reasons without polluting fulfillment KPIs.
+- Add more dbt tests (unique, not_null, accepted_values) and enable freshness checks on seeds/sources.
+- Set up CI (dbt build + tests) on pull requests and deploy docs with artifacts.
+- Convert heavy marts to incremental where appropriate and add partitioning by date for performance.
+- Expand documentation: model READMEs, column-level descriptions, lineage diagrams, and quickstart analysis guides for analysts.

@@ -1,0 +1,98 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: "Cleaned orders data"
+    columns:
+      - name: order_id
+        description: "Unique order identifier"
+        tests:
+          - not_null
+          - unique
+      - name: customer_id
+        description: "Customer who placed the order"
+        tests:
+          - not_null
+      - name: order_status
+        description: "Current status of the order"
+        tests:
+          - not_null
+      - name: order_purchase_timestamp
+        description: "When the order was placed"
+        tests:
+          - not_null
+
+  - name: stg_customers
+    description: "Cleaned customer information"
+    columns:
+      - name: customer_id
+        description : "Customer who placed the order"
+        tests:
+          - not_null
+          - unique
+      - name: customer_unique_id
+        description : "Unique customer who placed the order"
+        tests:
+          - not_null
+      - name: customer_zip_code_prefix
+        description : "Customer's zip code prefix"
+        tests:
+          - not_null
+
+  - name: stg_orders_items
+    description: "Individual items within each order"
+    columns:
+      - name: order_id
+        description : "Unique order identifier"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+      - name: product_id
+        description : "Unique product identifier"
+        tests:
+          - not_null
+      - name: order_item_id
+        description : "Order item identifier"
+        tests:
+          - not_null
+      - name: price
+        description : "Price of the related product"
+        tests:
+          - not_null
+
+  - name: stg_payments
+    description: "Order payment information"
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+      - name: payment_value
+        tests:
+          - not_null
+
+  - name: stg_products
+    description: "Product catalog data"
+    columns:
+      - name: product_id
+        description : "Unique order identifier"
+        tests:
+          - not_null
+          - unique
+      - name: product_weight_g
+        description : "Product weight"
+        tests:
+          - not_null
+
+  - name: stg_sellers
+    description: "Seller information"
+    columns:
+      - name: seller_id
+        description : "Unique seller identifier"
+        tests:
+          - not_null
+          - unique
